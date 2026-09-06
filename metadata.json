@@ -1,0 +1,8 @@
+{
+  "name": "Remix CircuSense AI",
+  "description": "AI-powered PCB component identification, circuit analysis, and AI-assisted fault detection platform.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
