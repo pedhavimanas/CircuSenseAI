@@ -43,6 +43,9 @@ export const Analyzer: React.FC<AnalyzerProps> = ({
 
   const abortControllerRef = useRef<AbortController | null>(null);
 
+  const effectiveError = errorMessage || (!isProcessing ? board.apiError : null) || null;
+  const isAnalyzing = isProcessing || (board.dimensions === 'Detecting...' && !board.analysis && !effectiveError);
+
   // Derive real detections from board.analysis or board.components
   const detections: PCBDetection[] = useMemo(() => {
     if (board.analysis?.detections) {
@@ -153,7 +156,7 @@ export const Analyzer: React.FC<AnalyzerProps> = ({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[#12151A] border border-slate-800 rounded-xl px-5 py-3.5 shadow-lg">
         <div className="flex items-center gap-3">
           <div className="p-2 rounded-lg bg-[#00D1FF]/10 text-[#00D1FF] border border-[#00D1FF]/20">
-            <Scan size={20} className={isProcessing ? 'animate-pulse' : ''} />
+            <Scan size={20} className={isAnalyzing ? 'animate-pulse' : ''} />
           </div>
           <div>
             <div className="flex items-center gap-2">
@@ -211,12 +214,14 @@ export const Analyzer: React.FC<AnalyzerProps> = ({
       </div>
 
       {/* Processing Status Banner */}
-      {isProcessing && (
+      {isAnalyzing && (
         <div className="p-3.5 rounded-xl bg-sky-950/40 border border-sky-500/40 text-xs text-sky-200 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Loader2 size={18} className="animate-spin text-[#00D1FF]" />
             <div className="space-y-0.5">
-              <span className="font-bold text-white block">{currentStage}</span>
+              <span className="font-bold text-white block">
+                {isProcessing ? currentStage : 'Running CircuSense YOLO model (best.pt)...'}
+              </span>
               <span className="text-slate-400 text-[11px] font-mono">Running Ultralytics inference on 22 hardware classes</span>
             </div>
           </div>
@@ -225,14 +230,14 @@ export const Analyzer: React.FC<AnalyzerProps> = ({
       )}
 
       {/* Technical Error Notice (Honest Error Handling - No Fake Fallback!) */}
-      {errorMessage && (
+      {effectiveError && (
         <div className="p-4 rounded-xl bg-rose-950/40 border border-rose-500/50 text-xs text-rose-200 space-y-2">
           <div className="flex items-center gap-2 font-bold text-rose-300">
             <AlertTriangle size={18} className="text-rose-400" />
             <span>PCB Detection Service Error</span>
           </div>
           <p className="text-slate-300 font-mono text-[11px] bg-black/40 p-2.5 rounded border border-rose-500/30">
-            {errorMessage}
+            {effectiveError}
           </p>
           <div className="flex items-center justify-between pt-1">
             <span className="text-[11px] text-slate-400">
@@ -249,7 +254,7 @@ export const Analyzer: React.FC<AnalyzerProps> = ({
       )}
 
       {/* Honest Empty Detection Notice */}
-      {!isProcessing && !errorMessage && isLiveUpload && detections.length === 0 && (
+      {!isAnalyzing && !effectiveError && isLiveUpload && detections.length === 0 && (
         <div className="p-4 rounded-xl bg-amber-950/30 border border-amber-500/40 text-xs text-amber-200 space-y-2">
           <div className="flex items-center gap-2 font-bold text-amber-300">
             <HelpCircle size={18} className="text-amber-400" />

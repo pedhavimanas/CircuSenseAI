@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { PCBBoard, ProjectRecord } from '../types';
+import { DetectionOptions } from '../services/detectionApi';
 import { validatePCBImage } from '../services/pcbValidator';
 import { 
   UploadCloud, 
@@ -19,7 +20,7 @@ import {
 } from 'lucide-react';
 
 interface DashboardProps {
-  onAnalyzePCB: (boardToAnalyze?: PCBBoard, customImageBase64?: string) => void;
+  onAnalyzePCB: (fileOrBoard?: File | PCBBoard, options?: DetectionOptions) => void;
   onNavigateToProjects: () => void;
   presetBoards: PCBBoard[];
   recentProjects: ProjectRecord[];
@@ -35,6 +36,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
 }) => {
   const [dragActive, setDragActive] = useState<boolean>(false);
   const [selectedPreset, setSelectedPreset] = useState<PCBBoard>(presetBoards[0]);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploadedImagePreview, setUploadedImagePreview] = useState<string | null>(null);
   const [uploadFileName, setUploadFileName] = useState<string | null>(null);
   const [isVerifying, setIsVerifying] = useState<boolean>(false);
@@ -65,9 +67,11 @@ export const Dashboard: React.FC<DashboardProps> = ({
     if (e.target.files && e.target.files[0]) {
       processFile(e.target.files[0]);
     }
+    e.target.value = '';
   };
 
   const processFile = (file: File) => {
+    setSelectedFile(file);
     setUploadFileName(file.name);
     setValidationError(null);
     setIsPcbVerified(false);
@@ -98,7 +102,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
   };
 
   const handleStartAnalysis = () => {
-    if (uploadedImagePreview) {
+    if (selectedFile) {
       if (isVerifying) return;
 
       // If validation check determined this is NOT a physical PCB, abort pipeline immediately
@@ -107,16 +111,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
         return;
       }
 
-      // Create a custom board representation with the verified uploaded image
-      const customBoard: PCBBoard = {
-        ...selectedPreset,
-        id: `custom-${Date.now()}`,
-        name: uploadFileName ? `Uploaded: ${uploadFileName.replace(/\.[^/.]+$/, "")}` : 'Custom Uploaded Board',
-        boardCode: 'CUSTOM-PCB-SCAN',
-        customImageBase64: uploadedImagePreview,
-        uploadedAt: new Date().toISOString().replace('T', ' ').slice(0, 16)
-      };
-      onAnalyzePCB(customBoard, uploadedImagePreview);
+      onAnalyzePCB(selectedFile);
     } else {
       onAnalyzePCB(selectedPreset);
     }
@@ -175,6 +170,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   </button>
                   <button
                     onClick={() => {
+                      setSelectedFile(null);
                       setUploadedImagePreview(null);
                       setUploadFileName(null);
                       setValidationError(null);
@@ -252,6 +248,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                     key={preset.id}
                     onClick={() => {
                       setSelectedPreset(preset);
+                      setSelectedFile(null);
                       setUploadedImagePreview(null);
                       setUploadFileName(null);
                       setValidationError(null);
@@ -277,9 +274,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
             {/* Primary CTA button */}
             <button
               onClick={handleStartAnalysis}
-              disabled={uploadedImagePreview ? (!isPcbVerified || isVerifying) : false}
+              disabled={selectedFile ? (!isPcbVerified || isVerifying) : false}
               className={`mt-2 px-8 py-3 font-bold rounded-lg transition-all flex items-center gap-2 ${
-                uploadedImagePreview && (!isPcbVerified || isVerifying)
+                selectedFile && (!isPcbVerified || isVerifying)
                   ? 'bg-slate-800/80 text-slate-500 cursor-not-allowed border border-slate-700'
                   : 'bg-[#00D1FF] hover:bg-[#00B8E0] text-[#0A0C0E] shadow-lg shadow-[#00D1FF20] cursor-pointer'
               }`}
