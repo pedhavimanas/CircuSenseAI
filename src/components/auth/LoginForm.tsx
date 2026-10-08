@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { PasswordInput } from './PasswordInput';
-import { Mail, ArrowRight, Loader2, Sparkles } from 'lucide-react';
+import { Mail, ArrowRight, Loader2, Sparkles, ShieldCheck } from 'lucide-react';
 
 interface LoginFormProps {
   onSwitchToSignup: () => void;
@@ -12,7 +12,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
   onSwitchToSignup,
   onSwitchToForgotPassword
 }) => {
-  const { login, loginWithDemo } = useAuth();
+  const { login, loginWithDemo, loginWithAdminDemo } = useAuth();
 
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
@@ -60,6 +60,13 @@ export const LoginForm: React.FC<LoginFormProps> = ({
     setPassword('pcbEngineer2026');
     setErrors({});
     loginWithDemo();
+  };
+
+  const handleQuickAdminDemo = () => {
+    setEmail('admin@circusense.ai');
+    setPassword('adminPlatform2026');
+    setErrors({});
+    loginWithAdminDemo();
   };
 
   return (
@@ -177,15 +184,29 @@ export const LoginForm: React.FC<LoginFormProps> = ({
             <div className="flex-grow border-t border-slate-200 dark:border-slate-800"></div>
           </div>
 
-          <button
-            type="button"
-            id="btn-quick-demo-login"
-            onClick={handleQuickDemo}
-            className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-slate-100 dark:bg-[#151922] hover:bg-slate-200/80 dark:hover:bg-[#1C222F] border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white text-xs font-medium transition-all group cursor-pointer"
-          >
-            <Sparkles size={14} className="text-sky-500 dark:text-[#00D1FF] group-hover:scale-110 transition-transform" />
-            <span>Instant Demo Login (Alex Chen)</span>
-          </button>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <button
+              type="button"
+              id="btn-quick-demo-login"
+              onClick={handleQuickDemo}
+              className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-slate-100 dark:bg-[#151922] hover:bg-slate-200/80 dark:hover:bg-[#1C222F] border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white text-xs font-medium transition-all group cursor-pointer"
+              title="Demo Engineer Account (User Portal)"
+            >
+              <Sparkles size={14} className="text-sky-500 dark:text-[#00D1FF] group-hover:scale-110 transition-transform shrink-0" />
+              <span className="truncate">Engineer Demo (Alex)</span>
+            </button>
+
+            <button
+              type="button"
+              id="btn-admin-demo-login"
+              onClick={handleQuickAdminDemo}
+              className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-slate-100 dark:bg-[#151922] hover:bg-slate-200/80 dark:hover:bg-[#1C222F] border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white text-xs font-medium transition-all group cursor-pointer"
+              title="Demo Administrator Account (Admin Portal)"
+            >
+              <ShieldCheck size={14} className="text-amber-500 group-hover:scale-110 transition-transform shrink-0" />
+              <span className="truncate">Admin Demo (Dr. Vance)</span>
+            </button>
+          </div>
         </div>
       </form>
 

@@ -307,11 +307,14 @@ export interface ChatMessage {
   suggestedPrompts?: string[];
 }
 
+export type UserRole = 'user' | 'admin';
+
 export interface AuthUser {
   id: string;
   name: string;
   email: string;
-  role?: string;
+  role: UserRole;
+  title?: string;
   avatar?: string;
   createdAt: string;
 }

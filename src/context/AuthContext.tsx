@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { AuthUser } from '../types';
+import { AuthUser, UserRole } from '../types';
 
 interface AuthContextType {
   user: AuthUser | null;
@@ -10,24 +10,51 @@ interface AuthContextType {
   logout: () => void;
   resetPassword: (email: string) => Promise<{ success: boolean; error?: string }>;
   loginWithDemo: () => void;
+  loginWithAdminDemo: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const STORAGE_KEY = 'circusense_auth_user';
 
+function normalizeStoredUser(raw: any): AuthUser {
+  // Only explicitly designated 'admin' role receives admin authorization
+  const role: UserRole = raw.role === 'admin' ? 'admin' : 'user';
+
+  // If raw.role was a legacy occupational title (not 'user' and not 'admin'), preserve as title
+  let title = raw.title;
+  if (!title && raw.role && raw.role !== 'user' && raw.role !== 'admin') {
+    title = String(raw.role);
+  }
+  if (!title) {
+    title = role === 'admin' ? 'Platform Director' : 'Senior Hardware Diagnostic Engineer';
+  }
+
+  return {
+    id: String(raw.id || `usr-${Date.now().toString(36)}`),
+    name: String(raw.name || 'PCB Engineer'),
+    email: String(raw.email || ''),
+    role,
+    title,
+    avatar: raw.avatar,
+    createdAt: String(raw.createdAt || new Date().toISOString())
+  };
+}
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  // Load user from localStorage on mount
+  // Load and normalize user from localStorage on mount
   useEffect(() => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
         const parsed = JSON.parse(stored);
         if (parsed && parsed.email) {
-          setUser(parsed);
+          const normalized = normalizeStoredUser(parsed);
+          setUser(normalized);
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(normalized));
         }
       }
     } catch (e) {
@@ -61,7 +88,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       id: `usr-${Date.now().toString(36)}`,
       name: displayName,
       email: trimmedEmail,
-      role: 'Senior Hardware Diagnostic Engineer',
+      role: 'user',
+      title: 'Senior Hardware Diagnostic Engineer',
       createdAt: new Date().toISOString()
     };
 
@@ -98,7 +126,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       id: `usr-${Date.now().toString(36)}`,
       name: trimmedName,
       email: trimmedEmail,
-      role: 'PCB Diagnostic Specialist',
+      role: 'user',
+      title: 'PCB Diagnostic Specialist',
       createdAt: new Date().toISOString()
     };
 
@@ -135,7 +164,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       id: 'usr-demo-01',
       name: 'Alex Chen',
       email: 'alex.chen@circusense.ai',
-      role: 'Lead Circuit Systems Engineer',
+      role: 'user',
+      title: 'Lead Circuit Systems Engineer',
       createdAt: new Date().toISOString()
     };
     try {
@@ -143,6 +173,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser(demoUser);
     } catch (e) {
       setUser(demoUser);
+    }
+  };
+
+  const loginWithAdminDemo = () => {
+    const adminUser: AuthUser = {
+      id: 'usr-admin-demo-01',
+      name: 'Dr. Sarah Vance',
+      email: 'admin@circusense.ai',
+      role: 'admin',
+      title: 'Platform Director',
+      createdAt: new Date().toISOString()
+    };
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(adminUser));
+      setUser(adminUser);
+    } catch (e) {
+      setUser(adminUser);
     }
   };
 
@@ -156,7 +203,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         signup,
         logout,
         resetPassword,
-        loginWithDemo
+        loginWithDemo,
+        loginWithAdminDemo
       }}
     >
       {children}
