@@ -27,6 +27,7 @@ import { DatasheetsPage } from './pages/DatasheetsPage';
 import { AIAssistantPage } from './pages/AIAssistantPage';
 import { MyProjectsPage } from './pages/MyProjectsPage';
 import { SettingsPage } from './pages/SettingsPage';
+import { AdminWorkspace } from './components/admin/AdminWorkspace';
 
 function CircuSenseWorkspace() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -426,11 +427,70 @@ function CircuSenseWorkspace() {
   );
 }
 
+function AppContent() {
+  const { isAuthenticated, isLoading, user } = useAuth();
+  const [adminViewingUserPortal, setAdminViewingUserPortal] = useState<boolean>(false);
+
+  // If user session changes or logs out, reset view state
+  useEffect(() => {
+    setAdminViewingUserPortal(false);
+  }, [user?.id]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen w-full bg-[#F8FAFC] dark:bg-[#07090F] flex flex-col items-center justify-center text-slate-700 dark:text-slate-300">
+        <div className="w-8 h-8 rounded-full border-2 border-sky-500 dark:border-[#00D1FF] border-t-transparent animate-spin mb-3"></div>
+        <p className="text-xs font-mono text-slate-500 dark:text-slate-400">Authenticating CircuSense AI Session...</p>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated || !user) {
+    return <AuthPage initialMode="login" />;
+  }
+
+  // Admin users enter Admin Portal by default
+  if (user.role === 'admin' && !adminViewingUserPortal) {
+    return (
+      <AdminWorkspace
+        onSwitchToUserPortal={() => setAdminViewingUserPortal(true)}
+      />
+    );
+  }
+
+  // Normal users (role === 'user') OR admin user who switched to User Portal
+  return (
+    <>
+      {user.role === 'admin' && adminViewingUserPortal && (
+        <div 
+          id="banner-admin-viewing-user"
+          className="bg-amber-500/10 border-b border-amber-500/30 px-3 sm:px-6 py-2 flex items-center justify-between text-xs text-amber-300 backdrop-blur-md sticky top-0 z-50 select-none"
+        >
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+            <span className="font-semibold text-amber-200">Admin Mode:</span>
+            <span className="text-amber-300/90 hidden sm:inline">Viewing standard User PCB inspection workspace</span>
+          </div>
+          <button
+            onClick={() => setAdminViewingUserPortal(false)}
+            id="btn-return-admin-portal"
+            className="px-3 py-1 rounded-md bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 border border-amber-500/40 font-semibold text-xs transition-colors cursor-pointer flex items-center gap-1.5"
+          >
+            <span>Return to Admin Portal</span>
+            <span>→</span>
+          </button>
+        </div>
+      )}
+      <CircuSenseWorkspace />
+    </>
+  );
+}
+
 export default function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <CircuSenseWorkspace />
+        <AppContent />
       </AuthProvider>
     </ThemeProvider>
   );
