@@ -17,7 +17,8 @@ from .schemas import (
     ImageMetadata,
     AnalysisTiming,
     ChatRequest,
-    ChatResponse
+    ChatResponse,
+    RawBBox
 )
 from .detector import PCBDetector
 from .preprocessing import validate_and_preprocess_image
