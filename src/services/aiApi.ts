@@ -22,15 +22,16 @@ export const aiApi = {
         },
         body: JSON.stringify({
           query,
-          boardContext: {
-            name: board.name,
+          analysisContext: {
+            boardName: board.name,
             boardCode: board.boardCode,
-            presetType: board.presetType,
-            components: board.components,
-            metrics: board.metrics,
-            isDemoData: board.isDemoData
+            totalComponents: board.metrics.totalComponents,
+            detections: board.components.map(c => c.modelClass || c.name)
           },
-          selectedComponent
+          selectedComponent: selectedComponent ? {
+            ...selectedComponent,
+            className: selectedComponent.modelClass || selectedComponent.type
+          } : undefined
         })
       });
 
