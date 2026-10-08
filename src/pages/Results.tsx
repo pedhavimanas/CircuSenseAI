@@ -102,7 +102,8 @@ export const Results: React.FC<ResultsProps> = ({
     return detections.filter(d => d.confidence < 0.5).length;
   }, [detections]);
 
-  const isLiveAnalysis = Boolean(board.customImageBase64) && !board.isDemoData;
+  const isLiveYolo = Boolean(board.analysis && board.scanSource === 'circusense_yolo');
+  const isDemo = Boolean(board.isDemoData || board.sourceType === 'demo' || board.presetType !== 'custom_uploaded');
 
   return (
     <div className="space-y-4 pb-10">
@@ -113,15 +114,20 @@ export const Results: React.FC<ResultsProps> = ({
             <h1 className="text-base font-bold text-white tracking-tight">
               PCB Inspection Results
             </h1>
-            {board.isDemoData ? (
+            {isLiveYolo ? (
+              <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1">
+                <CheckCircle2 size={11} />
+                <span>LIVE MODEL: CircuSense YOLO (best.pt)</span>
+              </span>
+            ) : isDemo ? (
               <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40 flex items-center gap-1">
                 <AlertTriangle size={11} />
                 <span>Demo Benchmark (Offline)</span>
               </span>
             ) : (
-              <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1">
-                <CheckCircle2 size={11} />
-                <span>LIVE MODEL: CircuSense YOLO (best.pt)</span>
+              <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded bg-slate-500/20 text-slate-400 border border-slate-500/30 flex items-center gap-1">
+                <AlertTriangle size={11} />
+                <span>Offline / Unverified Scan</span>
               </span>
             )}
           </div>
