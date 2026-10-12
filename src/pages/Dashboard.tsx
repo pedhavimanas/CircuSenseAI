@@ -42,6 +42,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
   const [isVerifying, setIsVerifying] = useState<boolean>(false);
   const [validationError, setValidationError] = useState<string | null>(null);
   const [isPcbVerified, setIsPcbVerified] = useState<boolean>(false);
+  const [runOcr, setRunOcr] = useState<boolean>(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleDrag = (e: React.DragEvent) => {
@@ -111,7 +112,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
         return;
       }
 
-      onAnalyzePCB(selectedFile);
+      onAnalyzePCB(selectedFile, { run_ocr: runOcr });
     } else {
       onAnalyzePCB(selectedPreset);
     }
@@ -270,6 +271,34 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 ))}
               </div>
             </div>
+
+            {/* OCR Toggle for Uploaded PCB */}
+            {selectedFile && isPcbVerified && !isVerifying && !validationError && (
+              <div className="w-full max-w-xl p-3.5 rounded-xl bg-[#080B0E] border border-slate-800 flex items-center justify-between text-left">
+                <label htmlFor="dashboard-ocr-toggle" className="flex items-center gap-2.5 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    id="dashboard-ocr-toggle"
+                    checked={runOcr}
+                    onChange={(e) => setRunOcr(e.target.checked)}
+                    className="w-4 h-4 rounded border-slate-700 bg-slate-900 text-[#00D1FF] focus:ring-[#00D1FF] cursor-pointer accent-[#00D1FF]"
+                  />
+                  <div className="flex items-center gap-1.5">
+                    <FileText size={14} className="text-[#00D1FF]" />
+                    <span className="text-xs font-semibold text-slate-200">
+                      Read component markings (OCR)
+                    </span>
+                  </div>
+                </label>
+                <span className={`text-[10px] font-mono font-semibold px-2 py-0.5 rounded border ${
+                  runOcr
+                    ? 'bg-[#00D1FF]/15 text-[#00D1FF] border-[#00D1FF]/30'
+                    : 'bg-slate-800 text-slate-400 border-slate-700'
+                }`}>
+                  {runOcr ? 'ENABLED' : 'OFF'}
+                </span>
+              </div>
+            )}
 
             {/* Primary CTA button */}
             <button

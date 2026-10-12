@@ -12,7 +12,8 @@ import {
   AlertTriangle,
   Cpu,
   Layers,
-  Sparkles
+  Sparkles,
+  FileText
 } from 'lucide-react';
 
 interface UploadModalProps {
@@ -255,6 +256,37 @@ export const UploadModal: React.FC<UploadModalProps> = ({
                   <span>0.25 (Default)</span>
                   <span>0.90 (High Precision)</span>
                 </div>
+              </div>
+
+              {/* Optical Character Recognition Toggle */}
+              <div className="p-4 rounded-xl bg-[#080B0E] border border-slate-800 space-y-2">
+                <div className="flex items-center justify-between">
+                  <label htmlFor="ocr-toggle" className="flex items-center gap-2.5 cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      id="ocr-toggle"
+                      checked={runOcr}
+                      onChange={(e) => setRunOcr(e.target.checked)}
+                      className="w-4 h-4 rounded border-slate-700 bg-slate-900 text-[#00D1FF] focus:ring-[#00D1FF] cursor-pointer accent-[#00D1FF]"
+                    />
+                    <div className="flex items-center gap-1.5">
+                      <FileText size={14} className="text-[#00D1FF]" />
+                      <span className="text-xs font-semibold text-slate-200">
+                        Read component markings (OCR)
+                      </span>
+                    </div>
+                  </label>
+                  <span className={`text-[10px] font-mono font-semibold px-2 py-0.5 rounded border ${
+                    runOcr
+                      ? 'bg-[#00D1FF]/15 text-[#00D1FF] border-[#00D1FF]/30'
+                      : 'bg-slate-800 text-slate-400 border-slate-700'
+                  }`}>
+                    {runOcr ? 'ENABLED' : 'OFF'}
+                  </span>
+                </div>
+                <p className="text-[11px] text-slate-400 pl-6 leading-relaxed">
+                  Attempts Tesseract OCR on detected component crops. Note: optical text extraction is experimental; markings are unverified readings, not guaranteed component identifiers.
+                </p>
               </div>
 
               {/* Fast Model Guarantee Notice */}

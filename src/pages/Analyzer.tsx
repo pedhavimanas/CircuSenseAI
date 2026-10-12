@@ -111,9 +111,11 @@ export const Analyzer: React.FC<AnalyzerProps> = ({
 
       setCurrentStage('Running CircuSense YOLO model (best.pt)...');
 
+      const wasOcrEnabled = board.analysis?.detections?.some(d => d.ocr?.status !== 'not_attempted') ?? false;
+
       const updatedBoard = await pcbApi.executeRealAnalysis(
         file,
-        { confidence_threshold: confidenceThreshold, iou_threshold: 0.45, image_size: 640 },
+        { confidence_threshold: confidenceThreshold, iou_threshold: 0.45, image_size: 640, run_ocr: wasOcrEnabled },
         controller.signal,
         (stage) => setCurrentStage(stage)
       );

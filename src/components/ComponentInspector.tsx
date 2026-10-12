@@ -112,9 +112,13 @@ export const ComponentInspector: React.FC<ComponentInspectorProps> = ({
           </div>
 
           <div className="p-2.5 rounded-lg bg-[#0A0C0E] border border-slate-800">
-            <span className="text-[10px] text-slate-500 block uppercase">OCR Marking Status</span>
+            <span className="text-[10px] text-slate-500 block uppercase">Optical Text (OCR)</span>
             <span className={`font-semibold ${detection.ocr?.status === 'detected' ? 'text-emerald-400' : 'text-slate-400'}`}>
-              {detection.ocr?.status === 'detected' ? detection.ocr.text : 'Not detected on body'}
+              {detection.ocr?.status === 'detected'
+                ? `${detection.ocr.text} (unverified)`
+                : detection.ocr?.status === 'not_attempted'
+                ? 'Not attempted (OCR off)'
+                : 'Not detected on body'}
             </span>
           </div>
 

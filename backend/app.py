@@ -23,7 +23,7 @@ from .schemas import (
 from .detector import PCBDetector
 from .preprocessing import validate_and_preprocess_image
 from .postprocessing import postprocess_yolo_detections
-from .ocr import run_ocr_on_crops
+from .ocr import run_ocr_on_crops, find_tesseract_cmd
 
 # Configure structured logging
 logging.basicConfig(
@@ -50,6 +50,13 @@ async def lifespan(app: FastAPI):
         logger.info(f"YOLO Detector loaded successfully: {len(detector.class_names)} classes.")
     except Exception as e:
         logger.critical(f"FATAL: Model could not be loaded on startup: {e}")
+
+    tess_path = find_tesseract_cmd()
+    if tess_path:
+        logger.info(f"Tesseract OCR executable discovered: {tess_path}")
+    else:
+        logger.info("Tesseract OCR executable not discovered; OCR will report 'not_attempted'.")
+
     yield
     logger.info("Shutting down CircuSense AI Backend Service...")
 

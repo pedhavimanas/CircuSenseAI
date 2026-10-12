@@ -210,6 +210,10 @@ export const DetectionTable: React.FC<DetectionTableProps> = ({
                         <span className="text-emerald-400 font-bold text-[11px]">
                           {det.ocr.text}
                         </span>
+                      ) : det.ocr?.status === 'not_attempted' ? (
+                        <span className="text-slate-500 text-[11px]">
+                          Not attempted
+                        </span>
                       ) : (
                         <span className="text-slate-500 text-[11px]">
                           Not readable
